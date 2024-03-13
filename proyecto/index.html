@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego</title>
+</head>
+<body>
+    <style>
+        body {
+            background-color: #222;
+            color: #eee;
+        }
+
+        .gameboard {
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 60vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .box {
+            width: 250px;
+            height: 30vh;
+        }
+
+        .left-top {
+            border-radius: 100% 0 0 0;
+        }
+
+        .right-top {
+            border-radius: 0 100% 0 0;
+        }
+
+        .left-bottom {
+            border-radius: 0 0 0 100%;
+        }
+
+        .right-bottom {
+            border-radius: 0 0 100% 0;
+        }
+
+        .celeste {
+            background-color: blue;
+        }
+
+        .violeta {
+            background-color: purple;
+        }
+
+        .naranja {
+            background-color: orange;
+        }
+
+        .verde {
+            background-color: green;
+        }
+
+        .celeste.light {
+            background-color: skyblue;
+        }
+
+        .violeta.light {
+            background-color: violet;
+        }
+
+        .naranja.light {
+            background-color: yellow;
+        }
+
+        .verde.light {
+            background-color: greenyellow;
+        }
+
+        .btn-start {
+            position: absolute;
+            border: 1px solid #eee;
+            padding: 1em 3em;
+            font-size: 1em; 
+            border-radius: 10px;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        * {
+            font-family: Arial;
+        }
+
+    </style>
+    <div class="gameboard">
+        <div id="celeste"  class="box color celeste left-top" data-color="celeste"></div>
+        <div id="violeta"  class="box color violeta right-top" data-color="violeta"></div>
+        <div id="naranja"  class="box color naranja left-bottom" data-color="naranja"></div>
+        <div id="verde" class="box color verde right-bottom" data-color="verde"></div>
+
+        <button id="btnEmpezar" class="btn-start" id="btnEmpezar" onclick="empezarJuego()">
+            Empezar juego
+        </button>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script type="text/javascript">
+        const btnEmpezar = document.getElementById('btnEmpezar');
+        const celeste = document.getElementById('celeste')
+        const violeta = document.getElementById('violeta')
+        const naranja = document.getElementById('naranja')
+        const verde = document.getElementById('verde')
+        const ULTIMO_NIVEL = 1;
+
+        class Juego
+        {
+            constructor()
+            {
+                this.inicializar = this.inicializar.bind(this);
+                this.inicializar();
+                this.generarSecuencia();
+                setTimeout(this.siguienteNivel, 500);
+            }
+
+            inicializar() 
+            {
+                this.siguienteNivel = this.siguienteNivel.bind(this);;
+                this.elegirColor = this.elegirColor.bind(this);
+                this.toggleBtnEmpezar();
+                this.nivel = 1;
+                this.colores = {
+                    celeste,
+                    violeta,
+                    naranja,
+                    verde,
+                }
+            }
+
+            toggleBtnEmpezar()
+            {
+                btnEmpezar.classList.toggle('hide');
+            }
+
+            generarSecuencia() 
+            {
+                this.secuencia = new Array(ULTIMO_NIVEL).fill(0).map(n => Math.floor(Math.random() * 4))
+
+            }
+
+            siguienteNivel() 
+            {
+                this.subnivel = 0;
+                this.iluminarSecuencia();
+                this.agregarEventosClick();
+            }
+
+            transformarNumeroAColor(numero)
+            {
+                switch(numero)
+                {
+                    case 0: return 'celeste';
+                    case 1: return 'violeta';
+                    case 2: return 'naranja';
+                    case 3: return 'verde';
+                }
+            }
+
+            transformarColorANumero(color)
+            {
+                switch(color)
+                {
+                    case 'celeste': return 0;
+                    case 'violeta': return 1;
+                    case 'naranja': return 2;
+                    case 'verde': return 3;
+                }
+            }
+
+            iluminarSecuencia()
+            {
+                for (let i=0; i < this.nivel; i++) {
+                    const color = this.transformarNumeroAColor(this.secuencia[i]);
+                    
+                    setTimeout(() => this.iluminarColor(color), 1000 * i)
+                }
+            }
+
+            iluminarColor(color) {
+                this.colores[color].classList.add('light')
+
+                setTimeout(() => {
+                    this.apagarColor(color);
+                }, 350)
+            }
+
+            apagarColor(color)
+            {
+                this.colores[color].classList.remove('light')
+            }
+
+            agregarEventosClick()
+            {
+                this.colores.celeste.addEventListener('click', this.elegirColor)
+                this.colores.violeta.addEventListener('click', this.elegirColor)
+                this.colores.naranja.addEventListener('click', this.elegirColor)
+                this.colores.verde.addEventListener('click', this.elegirColor)
+            }
+
+            eliminarEventosClick()
+            { 
+                this.colores.celeste.removeEventListener('click', this.elegirColor)
+                this.colores.violeta.removeEventListener('click', this.elegirColor)
+                this.colores.naranja.removeEventListener('click', this.elegirColor)
+                this.colores.verde.removeEventListener('click', this.elegirColor)
+            }
+
+            elegirColor(e) 
+            {
+                const nombreColor = e.target.dataset.color
+                const numero = this.transformarColorANumero(nombreColor)
+                this.iluminarColor(nombreColor)
+
+                if(numero === this.secuencia[this.subnivel]) {
+                    this.subnivel++;
+                    if(this.subnivel === this.nivel) {
+                        this.nivel++;
+                        this.eliminarEventosClick();
+                        if (this.nivel === (ULTIMO_NIVEL + 1)) {
+                            // ganó
+                            this.ganoElJuego();
+                        } else {
+                        }
+
+
+                    }
+                } else {
+                    // perdió
+                    setTimeout(this.siguienteNivel, 1500);
+                    this.perdioElJuego();
+                }    
+            }
+
+            ganoElJuego()
+            { 
+                swal('Felicitaciones, ganaste el juego!', 'success')
+                .then(this.inicializar);
+            }
+
+            perdioElJuego() 
+            {
+                swal('Lo siento, perdiste :(', 'error')
+                .then(() => {
+                    this.eliminarEventosClick();
+                    this.inicializar();
+                });
+            }
+        }
+
+        function empezarJuego() {
+            let juego = new Juego();
+        }
+
+    </script>
+
+
+</body>
+</html>
